@@ -13,8 +13,9 @@ import {
 } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
 
-const LoginPage = () => {
-  const { login, isAuthenticated } = useAuth();
+const SignupPage = () => {
+  const { signup, isAuthenticated } = useAuth();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -29,9 +30,9 @@ const LoginPage = () => {
     setIsLoading(true);
     setError(null);
     try {
-      await login(email, password);
+      await signup(name, email, password);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unable to login. Please try again.';
+      const message = err instanceof Error ? err.message : 'Unable to sign up. Please try again.';
       setError(message);
     } finally {
       setIsLoading(false);
@@ -40,20 +41,27 @@ const LoginPage = () => {
 
   return (
     <Box display="flex" alignItems="center" justifyContent="center" minHeight="100vh" bgcolor="background.default">
-      <Card elevation={3} sx={{ width: 420, borderRadius: 4 }}>
+      <Card elevation={3} sx={{ width: 460, borderRadius: 4 }}>
         <CardContent>
           <Stack spacing={3}>
             <Box textAlign="center">
               <Typography variant="h4" fontWeight={700} color="primary">
-                Warranty Intelligence Copilot
+                Create your account
               </Typography>
               <Typography variant="subtitle1" color="text.secondary">
-                Sign in to continue to your analytics workspace.
+                Sign up to access the Warranty Intelligence Copilot dashboard.
               </Typography>
             </Box>
             {error && <Alert severity="error">{error}</Alert>}
             <Box component="form" onSubmit={handleSubmit}>
               <Stack spacing={2}>
+                <TextField
+                  label="Full name"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  required
+                  fullWidth
+                />
                 <TextField
                   label="Email"
                   type="email"
@@ -71,14 +79,14 @@ const LoginPage = () => {
                   fullWidth
                 />
                 <Button type="submit" variant="contained" size="large" disabled={isLoading}>
-                  {isLoading ? 'Signing in…' : 'Sign In'}
+                  {isLoading ? 'Creating account…' : 'Sign Up'}
                 </Button>
               </Stack>
             </Box>
             <Typography variant="body2" align="center">
-              Don&apos;t have an account?{' '}
-              <Link component={RouterLink} to="/signup">
-                Sign up
+              Already have an account?{' '}
+              <Link component={RouterLink} to="/login">
+                Log in
               </Link>
             </Typography>
           </Stack>
@@ -88,4 +96,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default SignupPage;

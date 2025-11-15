@@ -6,6 +6,7 @@ import ClustersPage from '../pages/ClustersPage';
 import ClaimsPage from '../pages/ClaimsPage';
 import DashboardPage from '../pages/DashboardPage';
 import LoginPage from '../pages/LoginPage';
+import SignupPage from '../pages/SignupPage';
 import UploadPage from '../pages/UploadPage';
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
@@ -22,6 +23,7 @@ const AppRouter = () => {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
       <Route
         path="/"
         element={
