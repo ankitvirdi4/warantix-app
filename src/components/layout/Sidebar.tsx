@@ -1,11 +1,9 @@
-import { useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import HubIcon from '@mui/icons-material/Hub';
 import DescriptionIcon from '@mui/icons-material/Description';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { Box, Drawer, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography } from '@mui/material';
-import { useAuth } from '../../hooks/useAuth';
 
 const drawerWidth = 240;
 
@@ -13,28 +11,16 @@ interface NavItem {
   label: string;
   to: string;
   icon: React.ReactNode;
-  roles?: string[];
 }
 
 const navItems: NavItem[] = [
   { label: 'Dashboard', to: '/dashboard', icon: <DashboardIcon /> },
   { label: 'Clusters', to: '/clusters', icon: <HubIcon /> },
   { label: 'Claims', to: '/claims', icon: <DescriptionIcon /> },
-  { label: 'Upload CSV', to: '/upload', icon: <CloudUploadIcon />, roles: ['admin'] }
+  { label: 'Upload CSV', to: '/upload', icon: <CloudUploadIcon /> }
 ];
 
 const Sidebar = () => {
-  const { user } = useAuth();
-
-  const items = useMemo(() => {
-    return navItems.filter((item) => {
-      if (!item.roles || item.roles.length === 0) {
-        return true;
-      }
-      return item.roles.includes(user?.role ?? '');
-    });
-  }, [user]);
-
   return (
     <Drawer
       variant="permanent"
@@ -54,7 +40,7 @@ const Sidebar = () => {
       </Toolbar>
       <Box sx={{ overflow: 'auto' }}>
         <List>
-          {items.map((item) => (
+          {navItems.map((item) => (
             <ListItemButton
               key={item.to}
               component={NavLink}
