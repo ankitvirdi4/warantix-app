@@ -2,14 +2,16 @@ import type { ReactNode } from 'react';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { login as loginRequest } from '../api/auth';
-import type { LoginResponse, User } from '../types';
+import { login as loginRequest, signup as signupRequest } from '../api/auth';
+import type { AuthResponse } from '../api/auth';
+import type { User } from '../types';
 
 interface AuthContextValue {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  signup: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -46,7 +48,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, [user]);
 
-  const handleLoginResponse = useCallback((data: LoginResponse) => {
+  const handleAuthSuccess = useCallback((data: AuthResponse) => {
     setToken(data.access_token);
     setUser(data.user);
   }, []);
@@ -55,7 +57,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     async (email: string, password: string) => {
       try {
         const data = await loginRequest({ email, password });
-        handleLoginResponse(data);
+        handleAuthSuccess(data);
         navigate('/dashboard', { replace: true });
       } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -68,7 +70,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         throw error;
       }
     },
-    [handleLoginResponse, navigate]
+    [handleAuthSuccess, navigate]
+  );
+
+  const signup = useCallback(
+    async (name: string, email: string, password: string) => {
+      try {
+        const data = await signupRequest({ name, email, password });
+        handleAuthSuccess(data);
+        navigate('/dashboard', { replace: true });
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          const message =
+            (error.response?.data as { detail?: string } | undefined)?.detail ??
+            error.response?.statusText ??
+            error.message;
+          throw new Error(message || 'Sign up failed');
+        }
+        throw error;
+      }
+    },
+    [handleAuthSuccess, navigate]
   );
 
   const logout = useCallback(() => {
@@ -83,9 +105,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       token,
       isAuthenticated: Boolean(token),
       login,
+      signup,
       logout
     }),
-    [login, logout, token, user]
+    [login, logout, signup, token, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
