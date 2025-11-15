@@ -12,8 +12,9 @@ const AppLayout = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
-          ml: `${drawerWidth}px`
+          ml: `${drawerWidth}px`,
+          minHeight: '100vh',
+          bgcolor: '#f5f5f5'
         }}
       >
         <Toolbar />

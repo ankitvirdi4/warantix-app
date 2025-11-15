@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader } from '@mui/material';
+import { Box, Card, CardContent, Typography } from '@mui/material';
 import { Pie, PieChart, ResponsiveContainer, Tooltip, Cell } from 'recharts';
 import type { CostByComponent } from '../../types';
 
@@ -15,11 +15,29 @@ const CostByComponentChart = ({ data }: CostByComponentChartProps) => {
   }));
 
   return (
-    <Card elevation={0} sx={{ height: '100%', borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
-      <CardHeader title="Cost by Component" subheader="Total warranty spend distribution" />
-      <CardContent sx={{ height: 320 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
+    <Card
+      elevation={0}
+      sx={{
+        height: '100%',
+        borderRadius: 3,
+        border: '1px solid',
+        borderColor: 'divider',
+        display: 'flex',
+        flexDirection: 'column'
+      }}
+    >
+      <Box sx={{ px: 3, pt: 3, pb: 1.5 }}>
+        <Typography variant="h6" fontWeight={600}>
+          Cost by Component
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Total warranty spend distribution
+        </Typography>
+      </Box>
+      <CardContent sx={{ flexGrow: 1, width: '100%', display: 'flex', pt: 0, px: 3, pb: 3 }}>
+        <Box sx={{ flexGrow: 1, minHeight: 280 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
             <Pie
               data={chartData}
               dataKey="value"
@@ -35,7 +53,8 @@ const CostByComponentChart = ({ data }: CostByComponentChartProps) => {
             </Pie>
             <Tooltip formatter={(value: number) => `$${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}`} />
           </PieChart>
-        </ResponsiveContainer>
+          </ResponsiveContainer>
+        </Box>
       </CardContent>
     </Card>
   );
