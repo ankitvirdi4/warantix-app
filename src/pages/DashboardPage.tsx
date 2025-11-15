@@ -1,5 +1,16 @@
 import { useMemo } from 'react';
-import { Grid, Stack, Typography, Card, CardContent, List, ListItem, ListItemText } from '@mui/material';
+import {
+  Box,
+  Card,
+  CardContent,
+  Container,
+  Grid,
+  List,
+  ListItem,
+  ListItemText,
+  Stack,
+  Typography
+} from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCostByComponent, fetchTopFailures } from '../api/analytics';
 import { fetchClaims } from '../api/claims';
@@ -49,66 +60,86 @@ const DashboardPage = () => {
   }
 
   return (
-    <Stack spacing={4}>
-      <div>
-        <Typography variant="h4" fontWeight={700} gutterBottom>
-          Field Quality Pulse
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Monitor warranty health, identify emerging issues, and align corrective actions across the fleet.
-        </Typography>
-      </div>
+    <Box sx={{ width: '100%' }}>
+      <Container
+        maxWidth="xl"
+        sx={{
+          mx: 'auto',
+          maxWidth: '1440px',
+          px: { xs: 2, sm: 3 },
+          pt: 3,
+          pb: 6
+        }}
+      >
+        <Stack spacing={4}>
+          <Box>
+            <Typography variant="h4" fontWeight={700} sx={{ mb: 1 }}>
+              Field Quality Pulse
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Monitor warranty health, identify emerging issues, and align corrective actions across the fleet.
+            </Typography>
+          </Box>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={3}>
-          <StatCard title="Total Claims" value={claimsSummaryQuery.data?.total.toLocaleString() ?? '—'} />
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <StatCard title="Total Warranty Cost" value={`$${totalCost.toLocaleString(undefined, { maximumFractionDigits: 0 })}`} />
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <StatCard title="Top Failure" value={topCluster?.label ?? '—'} subtitle={topCluster ? `${topCluster.num_claims} claims` : undefined} />
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <StatCard title="Active Clusters" value={clustersQuery.data?.length.toLocaleString() ?? '—'} />
-        </Grid>
-      </Grid>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={3}>
+              <StatCard title="Total Claims" value={claimsSummaryQuery.data?.total.toLocaleString() ?? '—'} />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <StatCard
+                title="Total Warranty Cost"
+                value={`$${totalCost.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <StatCard
+                title="Top Failure"
+                value={topCluster?.label ?? '—'}
+                subtitle={topCluster ? `${topCluster.num_claims} claims` : undefined}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <StatCard title="Active Clusters" value={clustersQuery.data?.length.toLocaleString() ?? '—'} />
+            </Grid>
+          </Grid>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={7}>
-          <TopFailuresChart data={topFailuresQuery.data?.clusters ?? []} />
-        </Grid>
-        <Grid item xs={12} md={5}>
-          <CostByComponentChart data={costByComponentQuery.data ?? []} />
-        </Grid>
-      </Grid>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={7}>
+              <TopFailuresChart data={topFailuresQuery.data?.clusters ?? []} />
+            </Grid>
+            <Grid item xs={12} md={5}>
+              <CostByComponentChart data={costByComponentQuery.data ?? []} />
+            </Grid>
+          </Grid>
 
-      <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
-        <CardContent>
-          <Typography variant="h6" fontWeight={700} gutterBottom>
-            AI Triage Summary
-          </Typography>
-          <Typography variant="body2" color="text.secondary" gutterBottom>
-            Top attention areas across recent warranty activity.
-          </Typography>
-          <List>
-            {aiSummaryClusters.map((cluster) => (
-              <ListItem key={cluster.cluster_id} divider>
-                <ListItemText
-                  primary={`${cluster.label} — ${cluster.num_claims.toLocaleString()} claims`}
-                  secondary={`Estimated spend $${cluster.total_cost_usd.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
-                />
-              </ListItem>
-            ))}
-            {aiSummaryClusters.length === 0 && (
-              <Typography variant="body2" color="text.secondary">
-                No cluster intelligence available yet.
+          <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
+            <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
+              <Typography variant="h6" fontWeight={700} gutterBottom>
+                AI Triage Summary
               </Typography>
-            )}
-          </List>
-        </CardContent>
-      </Card>
-    </Stack>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Top attention areas across recent warranty activity.
+              </Typography>
+              <List>
+                {aiSummaryClusters.map((cluster) => (
+                  <ListItem key={cluster.cluster_id} divider>
+                    <ListItemText
+                      primary={`${cluster.label} — ${cluster.num_claims.toLocaleString()} claims`}
+                      secondary={`Estimated spend $${cluster.total_cost_usd.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
+                    />
+                  </ListItem>
+                ))}
+                {aiSummaryClusters.length === 0 && (
+                  <Typography variant="body2" color="text.secondary">
+                    No cluster intelligence available yet.
+                  </Typography>
+                )}
+              </List>
+            </CardContent>
+          </Card>
+        </Stack>
+      </Container>
+    </Box>
   );
 };
 
