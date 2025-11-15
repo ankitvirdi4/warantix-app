@@ -1,16 +1,20 @@
 import apiClient from './client';
 
-export interface UploadResponse {
+export interface IngestResponse {
   rows_processed: number;
   rows_inserted: number;
-  total_cost_usd: number;
+  total_cost_usd?: number;
 }
 
-export const uploadClaimsCsv = async (file: File): Promise<UploadResponse> => {
+export async function uploadClaimsCsv(file: File): Promise<IngestResponse> {
   const formData = new FormData();
   formData.append('file', file);
-  const { data } = await apiClient.post<UploadResponse>('/ingest/claims-csv', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
+
+  const response = await apiClient.post<IngestResponse>('/ingest/claims-csv', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
   });
-  return data;
-};
+
+  return response.data;
+}

@@ -20,7 +20,7 @@ const navItems: NavItem[] = [
   { label: 'Dashboard', to: '/dashboard', icon: <DashboardIcon /> },
   { label: 'Clusters', to: '/clusters', icon: <HubIcon /> },
   { label: 'Claims', to: '/claims', icon: <DescriptionIcon /> },
-  { label: 'Upload', to: '/upload', icon: <CloudUploadIcon />, roles: ['admin'] }
+  { label: 'Upload CSV', to: '/upload', icon: <CloudUploadIcon />, roles: ['admin'] }
 ];
 
 const Sidebar = () => {

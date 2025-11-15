@@ -1,90 +1,83 @@
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import {
   Alert,
   Box,
   Button,
   Card,
   CardContent,
-  Stack,
+  LinearProgress,
   Typography
 } from '@mui/material';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { uploadClaimsCsv } from '../api/ingest';
-import { useAuth } from '../hooks/useAuth';
+import { useMutation } from '@tanstack/react-query';
+import { uploadClaimsCsv, type IngestResponse } from '../api/ingest';
 
 const UploadPage = () => {
   const [file, setFile] = useState<File | null>(null);
-  const { user } = useAuth();
+  const [success, setSuccess] = useState<IngestResponse | null>(null);
 
-  const uploadMutation = useMutation({
-    mutationFn: uploadClaimsCsv
+  const { mutate, isLoading, isError, error } = useMutation({
+    mutationFn: (selectedFile: File) => uploadClaimsCsv(selectedFile),
+    onSuccess: (data) => {
+      setSuccess(data);
+    }
   });
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files && files.length > 0) {
-      setFile(files[0]);
-    } else {
-      setFile(null);
-    }
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSuccess(null);
+    const selectedFile = event.target.files?.[0] ?? null;
+    setFile(selectedFile);
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!file) {
-      return;
-    }
-    uploadMutation.mutate(file);
+    if (!file) return;
+    setSuccess(null);
+    mutate(file);
   };
-
-  const isAdmin = user?.role === 'admin';
-
-  if (!isAdmin) {
-    return (
-      <Box maxWidth={640}>
-        <Typography variant="h4" fontWeight={700} gutterBottom>
-          Claims Ingestion
-        </Typography>
-        <Alert severity="info">
-          Data ingestion is currently limited to administrator accounts. Please contact the quality systems team to request
-          access.
-        </Alert>
-      </Box>
-    );
-  }
 
   return (
-    <Box maxWidth={640}>
-      <Typography variant="h4" fontWeight={700} gutterBottom>
-        Claims Ingestion
-      </Typography>
-      <Typography variant="body1" color="text.secondary" paragraph>
-        Upload dealer warranty claim CSV exports to refresh analytics and AI insights across the fleet.
-      </Typography>
-
-      <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
+    <Box display="flex" justifyContent="center" mt={4}>
+      <Card sx={{ width: '100%', maxWidth: 600 }}>
+        {isLoading && <LinearProgress />}
         <CardContent>
-          <Stack spacing={3} component="form" onSubmit={handleSubmit}>
-            <Button variant="outlined" component="label" startIcon={<CloudUploadIcon />}>
-              {file ? file.name : 'Select CSV file'}
-              <input type="file" accept=".csv" hidden onChange={handleFileChange} />
-            </Button>
-            <Button type="submit" variant="contained" disabled={!file || uploadMutation.isPending}>
-              {uploadMutation.isPending ? 'Uploading…' : 'Upload & Ingest'}
-            </Button>
-            {uploadMutation.isSuccess && uploadMutation.data && (
-              <Alert severity="success">
-                Processed {uploadMutation.data.rows_processed} rows, inserted {uploadMutation.data.rows_inserted}. Total cost impact ${uploadMutation.data.total_cost_usd.toLocaleString(
-                  undefined,
-                  { maximumFractionDigits: 0 }
-                )}.
-              </Alert>
-            )}
-            {uploadMutation.isError && (
-              <Alert severity="error">{(uploadMutation.error as Error).message ?? 'Upload failed'}</Alert>
-            )}
-          </Stack>
+          <Typography variant="h5" gutterBottom>
+            Upload Warranty Claims CSV
+          </Typography>
+          <Typography variant="body2" color="text.secondary" gutterBottom>
+            Select a CSV file with warranty claims and upload it to ingest data into Warrantrix.
+          </Typography>
+
+          <Box component="form" onSubmit={handleSubmit} mt={2}>
+            <input accept=".csv" type="file" onChange={handleFileChange} style={{ marginBottom: 16 }} />
+
+            <Box mt={1} mb={2}>
+              <Button type="submit" variant="contained" disabled={!file || isLoading}>
+                {isLoading ? 'Uploading...' : 'Upload & Ingest'}
+              </Button>
+            </Box>
+          </Box>
+
+          {isError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {error instanceof Error ? error.message : 'Upload failed'}
+            </Alert>
+          )}
+
+          {success && (
+            <Alert severity="success" sx={{ mt: 2 }}>
+              <Typography variant="body2">
+                Rows processed: <b>{success.rows_processed}</b>
+              </Typography>
+              <Typography variant="body2">
+                Rows inserted: <b>{success.rows_inserted}</b>
+              </Typography>
+              {success.total_cost_usd !== undefined && (
+                <Typography variant="body2">
+                  Total cost: <b>${success.total_cost_usd.toFixed(2)}</b>
+                </Typography>
+              )}
+            </Alert>
+          )}
         </CardContent>
       </Card>
     </Box>
